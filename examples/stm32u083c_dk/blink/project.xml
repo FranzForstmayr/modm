@@ -1,0 +1,9 @@
+<library>
+  <extends>modm:disco-u083c</extends>
+  <options>
+    <option name="modm:build:build.path">../../../build/stm32u083c_dk/blink</option>
+  </options>
+  <modules>
+    <module>modm:build:scons</module>
+  </modules>
+</library>
