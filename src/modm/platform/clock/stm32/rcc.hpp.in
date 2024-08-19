@@ -86,7 +86,7 @@ public:
 		InternalClock = Hsi16,
 		/// High speed external clock
 		Hse = RCC_CFGR_PLLSRC,
-%% elif target.family == "l5"
+%% elif target.family in ["l5", "u0"]
 		/// High speed internal clock (16 MHz)
 		Hsi = RCC_PLLCFGR_PLLSRC_1,
 		Hsi16 = Hsi,
@@ -134,7 +134,7 @@ public:
 	enum class
 	SystemClockSource : uint32_t
 	{
-%% if target.family == "l5"
+%% if target.family in ["l5", "u0"]
 		Msi = 0,
 		Hsi = RCC_CFGR_SW_0,
 		Hsi16 = Hsi,
@@ -194,7 +194,7 @@ public:
 	enum class
 	AhbPrescaler : uint32_t
 	{
-%% if target.family in ["l5", "u5"]
+%% if target.family in ["l5", "u0", "u5"]
 		Div1   = 0b0000 << RCC_{{cfgr_prescaler}}_HPRE_Pos,
 		Div2   = 0b1000 << RCC_{{cfgr_prescaler}}_HPRE_Pos,
 		Div4   = 0b1001 << RCC_{{cfgr_prescaler}}_HPRE_Pos,
@@ -237,6 +237,12 @@ public:
 		Div4   = 0b101 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE1_Pos,
 		Div8   = 0b110 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE1_Pos,
 		Div16  = 0b111 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE1_Pos
+%% elif target.family == "u0"
+		Div1   = 0b000 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos,
+		Div2   = 0b100 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos,
+		Div4   = 0b101 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos,
+		Div8   = 0b110 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos,
+		Div16  = 0b111 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos
 %% else
 		Div1   = RCC_{{cfgr2}}_{{d2}}PPRE1_DIV1,
 		Div2   = RCC_{{cfgr2}}_{{d2}}PPRE1_DIV2,
@@ -255,6 +261,7 @@ public:
 		Div4   = 0b101 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE2_Pos,
 		Div8   = 0b110 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE2_Pos,
 		Div16  = 0b111 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE2_Pos
+%% elif target.family == "u0"
 %% else
 		Div1   = RCC_{{cfgr2}}_{{d2}}PPRE2_DIV1,
 		Div2   = RCC_{{cfgr2}}_{{d2}}PPRE2_DIV2,
@@ -355,6 +362,7 @@ public:
 	};
 %% endif
 
+%% set cfgr_mco="CFGR1" if target.family in ["u5"] else "CFGR"
 %% if target.family in ["f2", "f4", "f7"]
 	enum class
 	ClockOutput1Source : uint32_t
@@ -397,7 +405,6 @@ public:
 		Lsi = RCC_CFGR_MCO2_2 | RCC_CFGR_MCO2_0
 	};
 %% elif target.family in ["l0", "l1", "l4", "l5", "g0", "g4", "u5"]
-%% set cfgr_mco="CFGR1" if target.family in ["u5"] else "CFGR"
 	enum class
 	ClockOutputSource : uint32_t
 	{
@@ -425,6 +432,15 @@ public:
 		Hsi48 = (0b1000 << RCC_{{cfgr_mco}}_MCOSEL_Pos), // HSI48
 		MultiSpeedInternalClockK = (0b1001 << RCC_{{cfgr_mco}}_MCOSEL_Pos), // MSIK
 	%% endif
+	};
+%% elif target.family == "u0"
+	enum class
+		ClockOutputSource : uint32_t
+		{
+		Disable = 0b0000,
+		SystemClock = (0b0001 << RCC_CFGR_MCO1SEL_Pos), // SYSCLK
+		LowSpeedInternalClock = (0b0110 << RCC_CFGR_MCO1SEL_Pos), // LSI
+		LowSpeedExternalClock = (0b0111 << RCC_CFGR_MCO1SEL_Pos), // LSE
 	};
 %% else
 	enum class
@@ -835,7 +851,7 @@ public:
 		RCC->CFGR = tmp | uint32_t(src);
 		return true;
 	}
-%% elif target.family in ["l0", "l1", "l4", "l5", "g0", "g4", "u5"]
+%% elif target.family in ["l0", "l1", "l4", "l5", "g0", "g4", "u0", "u5"]
 	enum class
 	ClockOutputPrescaler : uint32_t
 	{

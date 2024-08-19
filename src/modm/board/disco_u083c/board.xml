@@ -6,7 +6,7 @@
   </repositories>
 
   <options>
-    <option name="modm:target">stm32u83mct6</option>
+    <option name="modm:target">stm32u083mct6</option>
   </options>
   <modules>
     <module>modm:board:disco-u083c</module>
