@@ -86,7 +86,7 @@ public:
 		InternalClock = Hsi16,
 		/// High speed external clock
 		Hse = RCC_CFGR_PLLSRC,
-%% elif target.family in ["l5", "u0"]
+%% elif target.family in ["l5"]
 		/// High speed internal clock (16 MHz)
 		Hsi = RCC_PLLCFGR_PLLSRC_1,
 		Hsi16 = Hsi,
@@ -96,7 +96,7 @@ public:
 		/// Multi speed internal clock
 		Msi = RCC_PLLCFGR_PLLSRC_0,
 		MultiSpeedInternalClock = Msi,
-%% elif target.family in ["u5"]
+%% elif target.family in ["u0", "u5"]
 		None = 0b00,
 		MsiS = 0b01,
 		Hsi16 = 0b10,
@@ -134,17 +134,21 @@ public:
 	enum class
 	SystemClockSource : uint32_t
 	{
-%% if target.family in ["l5", "u0"]
+%% if target.family in ["l5"]
 		Msi = 0,
 		Hsi = RCC_CFGR_SW_0,
 		Hsi16 = Hsi,
 		Hse = RCC_CFGR_SW_1,
 		Pll = RCC_CFGR_SW_1 | RCC_CFGR_SW_0,
-%% elif target.family in ["u5"]
+%% elif target.family in ["u0", "u5"]
 		Msi = 0b00,
 		Hsi16 = 0b01,
 		Hse = 0b10,
 		Pll = 0b11,
+		%% if target.family in ["u0"]
+		Lsi = 0b100,
+		Lse = 0b101,
+		%% endif
 %% else
 		Hsi = RCC_CFGR_SW_HSI,
 %% if target.family == "l0"
@@ -227,6 +231,16 @@ public:
 		Div8   = RCC_CFGR_PPRE_DIV8,
 		Div16  = RCC_CFGR_PPRE_DIV16
 	};
+%% elif target.family in ["u0"]
+	enum class
+	ApbPrescaler : uint32_t
+	{
+		Div1   = RCC_CFGR_PPRE_0,
+		Div2   = RCC_CFGR_PPRE_2,
+		Div4   = RCC_CFGR_PPRE_2 | RCC_CFGR_PPRE_0,
+		Div8   = RCC_CFGR_PPRE_2 | RCC_CFGR_PPRE_1,
+		Div16  = RCC_CFGR_PPRE_2 | RCC_CFGR_PPRE_1 | RCC_CFGR_PPRE_0
+	};
 %% else
 	enum class
 	Apb1Prescaler : uint32_t
@@ -237,12 +251,6 @@ public:
 		Div4   = 0b101 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE1_Pos,
 		Div8   = 0b110 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE1_Pos,
 		Div16  = 0b111 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE1_Pos
-%% elif target.family == "u0"
-		Div1   = 0b000 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos,
-		Div2   = 0b100 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos,
-		Div4   = 0b101 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos,
-		Div8   = 0b110 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos,
-		Div16  = 0b111 << RCC_{{cfgr_prescaler}}_{{d2}}PPRE_Pos
 %% else
 		Div1   = RCC_{{cfgr2}}_{{d2}}PPRE1_DIV1,
 		Div2   = RCC_{{cfgr2}}_{{d2}}PPRE1_DIV2,
@@ -404,6 +412,36 @@ public:
 		Csi = RCC_CFGR_MCO2_2,
 		Lsi = RCC_CFGR_MCO2_2 | RCC_CFGR_MCO2_0
 	};
+%% elif target.family in ["u0"]
+	enum class
+	ClockOutput1Source : uint32_t
+	{
+		Disable = 0b0000,
+		SystemClock = RCC_CFGR_MCO1SEL_0,
+		MultiSpeedInternalClockS = RCC_CFGR_MCO1SEL_1,
+		Hsi16 = RCC_CFGR_MCO1SEL_0 | RCC_CFGR_MCO1SEL_1,
+		Hse = RCC_CFGR_MCO1SEL_2,
+		Pll = RCC_CFGR_MCO1SEL_2 | RCC_CFGR_MCO1SEL_0,
+		Lsi = RCC_CFGR_MCO1SEL_2 | RCC_CFGR_MCO1SEL_1,
+		Lse = RCC_CFGR_MCO1SEL_2 | RCC_CFGR_MCO1SEL_1 | RCC_CFGR_MCO1SEL_0,
+		Hsi48 = RCC_CFGR_MCO1SEL_3,
+		MsiK = RCC_CFGR_MCO1SEL_3 | RCC_CFGR_MCO1SEL_0
+	};
+
+	enum class
+	ClockOutput2Source : uint32_t
+	{
+		Disable = 0b0000,
+		SystemClock = RCC_CFGR_MCO2SEL_0,
+		MultiSpeedInternalClockS = RCC_CFGR_MCO2SEL_1,
+		Hsi16 = RCC_CFGR_MCO2SEL_0 | RCC_CFGR_MCO2SEL_1,
+		Hse = RCC_CFGR_MCO2SEL_2,
+		Pll = RCC_CFGR_MCO2SEL_2 | RCC_CFGR_MCO2SEL_0,
+		Lsi = RCC_CFGR_MCO2SEL_2 | RCC_CFGR_MCO2SEL_1,
+		Lse = RCC_CFGR_MCO2SEL_2 | RCC_CFGR_MCO2SEL_1 | RCC_CFGR_MCO2SEL_0,
+		Hsi48 = RCC_CFGR_MCO2SEL_3,
+		MsiK = RCC_CFGR_MCO2SEL_3 | RCC_CFGR_MCO2SEL_0
+	};
 %% elif target.family in ["l0", "l1", "l4", "l5", "g0", "g4", "u5"]
 	enum class
 	ClockOutputSource : uint32_t
@@ -432,15 +470,6 @@ public:
 		Hsi48 = (0b1000 << RCC_{{cfgr_mco}}_MCOSEL_Pos), // HSI48
 		MultiSpeedInternalClockK = (0b1001 << RCC_{{cfgr_mco}}_MCOSEL_Pos), // MSIK
 	%% endif
-	};
-%% elif target.family == "u0"
-	enum class
-		ClockOutputSource : uint32_t
-		{
-		Disable = 0b0000,
-		SystemClock = (0b0001 << RCC_CFGR_MCO1SEL_Pos), // SYSCLK
-		LowSpeedInternalClock = (0b0110 << RCC_CFGR_MCO1SEL_Pos), // LSI
-		LowSpeedExternalClock = (0b0111 << RCC_CFGR_MCO1SEL_Pos), // LSE
 	};
 %% else
 	enum class
@@ -641,6 +670,12 @@ public:
 		uint8_t pllQ;
 		uint8_t pllR;
 		uint16_t pllFrac = 0;
+%% elif target.family in ["u0"]
+		uint8_t pllM;
+		uint16_t pllN;
+		uint8_t pllP;
+		uint8_t pllQ;
+		uint8_t pllR;
 %% elif target.family in ["u5"]
 		PllInputRange range;
 		uint8_t pllM;
@@ -851,7 +886,55 @@ public:
 		RCC->CFGR = tmp | uint32_t(src);
 		return true;
 	}
-%% elif target.family in ["l0", "l1", "l4", "l5", "g0", "g4", "u0", "u5"]
+%% elif target.family in ["u0"]
+	enum class
+	ClockOutput1Prescaler : uint32_t
+	{
+		Div1 	= 0x0UL << RCC_CFGR_MCO1PRE_Pos,
+		Div2 	= 0x1UL << RCC_CFGR_MCO1PRE_Pos,
+		Div4 	= 0x2UL << RCC_CFGR_MCO1PRE_Pos,
+		Div8 	= 0x3UL << RCC_CFGR_MCO1PRE_Pos,
+		Div16 	= 0x4UL << RCC_CFGR_MCO1PRE_Pos,
+		Div32 	= 0x5UL << RCC_CFGR_MCO1PRE_Pos,
+		Div64 	= 0x6UL << RCC_CFGR_MCO1PRE_Pos,
+		Div128 	= 0x7UL << RCC_CFGR_MCO1PRE_Pos,
+		Div256 	= 0x8UL << RCC_CFGR_MCO1PRE_Pos,
+		Div512 	= 0x9UL << RCC_CFGR_MCO1PRE_Pos,
+		Div1024 = 0xaUL << RCC_CFGR_MCO1PRE_Pos,
+	};
+
+	static inline bool
+	enableClockOutput1(ClockOutput1Source src, ClockOutput1Prescaler div = ClockOutput1Prescaler::Div1)
+	{
+		RCC->CFGR = (RCC->CFGR & ~(RCC_CFGR_MCO1PRE)) | uint32_t(src) | uint32_t(div);
+		return true;
+	}
+
+	enum class
+	ClockOutput2Prescaler : uint32_t
+	{
+		Div1 	= 0x0UL << RCC_CFGR_MCO2PRE_Pos,
+		Div2 	= 0x1UL << RCC_CFGR_MCO2PRE_Pos,
+		Div4 	= 0x2UL << RCC_CFGR_MCO2PRE_Pos,
+		Div8 	= 0x3UL << RCC_CFGR_MCO2PRE_Pos,
+		Div16 	= 0x4UL << RCC_CFGR_MCO2PRE_Pos,
+		Div32 	= 0x5UL << RCC_CFGR_MCO2PRE_Pos,
+		Div64 	= 0x6UL << RCC_CFGR_MCO2PRE_Pos,
+		Div128 	= 0x7UL << RCC_CFGR_MCO2PRE_Pos,
+		Div256 	= 0x8UL << RCC_CFGR_MCO2PRE_Pos,
+		Div512 	= 0x9UL << RCC_CFGR_MCO2PRE_Pos,
+		Div1024 = 0xaUL << RCC_CFGR_MCO2PRE_Pos,
+	};
+
+	static inline bool
+	enableClockOutput2(ClockOutput2Source src, ClockOutput2Prescaler div = ClockOutput2Prescaler::Div1)
+	{
+		RCC->CFGR = (RCC->CFGR & ~(RCC_CFGR_MCO2PRE)) | uint32_t(src) | uint32_t(div);
+		return true;
+	}
+
+
+%% elif target.family in ["l0", "l1", "l4", "l5", "g0", "g4", "u5"]
 	enum class
 	ClockOutputPrescaler : uint32_t
 	{
@@ -890,7 +973,7 @@ public:
 		return true;
 	}
 
-%% if target.family in ["f0", "g0"]
+%% if target.family in ["f0", "g0", "u0"]
 	static inline bool
 	setApbPrescaler(ApbPrescaler prescaler)
 	{
