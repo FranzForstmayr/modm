@@ -171,6 +171,10 @@ jobs:
         if: always()
         run: |
           (cd examples && ../tools/scripts/examples_compile.py nucleo_l552ze-q)
+      - name: Examples STM32U0 Series
+        if: always()
+        run: |
+          (cd examples && ../tools/scripts/examples_compile.py stm32u083c_dk)
       - name: Examples STM32U5 Series
         if: always()
         run: |
